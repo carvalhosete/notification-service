@@ -4,6 +4,7 @@ import br.com.project.notification_service.dto.NotificacaoBloqueioDTO;
 import br.com.project.notification_service.service.EmailService;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Component;
 
 
@@ -20,6 +21,13 @@ public class NotificacaoBloqueioConsumer {
         System.out.println("MOTIVO: " + payload.motivo());
         System.out.println("DATA: " + payload.dataHora());
 
-        emailService.enviarEmailBloqueio(payload.email());
+        try{
+            emailService.enviarEmailBloqueio(payload.email());
+        } catch (MailException e){
+            System.err.println("Erro ao disparar SMTP para bloqueio: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Erro crítico/malformação no processamento do bloqueio: " + e.getMessage());
+        }
     }
 }
